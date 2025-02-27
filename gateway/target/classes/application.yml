@@ -1,0 +1,92 @@
+server:
+  port: 8088
+
+---
+
+spring:
+  profiles: default
+  cloud:
+    gateway:
+#<<< API Gateway / Routes
+      routes:
+        - id: analysis
+          uri: http://localhost:8082
+          predicates:
+            - Path=, /dashboards/**
+        - id: recommendation
+          uri: http://localhost:8083
+          predicates:
+            - Path=/recommendations/**, 
+        - id: study
+          uri: http://localhost:8084
+          predicates:
+            - Path=/lectures/**, 
+        - id: user
+          uri: http://localhost:8085
+          predicates:
+            - Path=/teacherInfos/**, /studentInfos/**, 
+        - id: boundedcontext10121951219512196
+          uri: http://localhost:8086
+          predicates:
+            - Path=/registrations/**, 
+        - id: frontend
+          uri: http://localhost:8080
+          predicates:
+            - Path=/**
+#>>> API Gateway / Routes
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+
+---
+
+spring:
+  profiles: docker
+  cloud:
+    gateway:
+      routes:
+        - id: analysis
+          uri: http://analysis:8080
+          predicates:
+            - Path=, 
+        - id: recommendation
+          uri: http://recommendation:8080
+          predicates:
+            - Path=/recommendations/**, 
+        - id: study
+          uri: http://study:8080
+          predicates:
+            - Path=/lectures/**, 
+        - id: user
+          uri: http://user:8080
+          predicates:
+            - Path=/teacherInfos/**, /studentInfos/**, 
+        - id: boundedcontext10121951219512196
+          uri: http://boundedcontext10121951219512196:8080
+          predicates:
+            - Path=/registrations/**, 
+        - id: frontend
+          uri: http://frontend:8080
+          predicates:
+            - Path=/**
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins:
+              - "*"
+            allowedMethods:
+              - "*"
+            allowedHeaders:
+              - "*"
+            allowCredentials: true
+
+server:
+  port: 8080

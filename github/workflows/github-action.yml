@@ -1,0 +1,87 @@
+name: github-action
+run-name: ${{ github.actor }} is out building GitHub Actions
+
+on:
+  push:
+    # Pattern matched against refs/tags
+    tags:        
+      - '**' 
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build Maven Projects
+        run: |
+          mvn clean package -f ./analysis/pom.xml
+          mvn clean package -f ./recommendation/pom.xml
+          mvn clean package -f ./study/pom.xml
+          mvn clean package -f ./user/pom.xml
+          mvn clean package -f ./boundedcontext10121951219512196/pom.xml
+
+      - name: Docker Build and push for Analysis
+        uses: docker/build-push-action@v4
+        with:
+          context: ./analysis
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/analysis:latest
+            ghcr.io/${{ github.repository }}/analysis:${{ github.ref_name }}
+            
+      - name: Docker Build and push for Recommendation
+        uses: docker/build-push-action@v4
+        with:
+          context: ./recommendation
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/recommendation:latest
+            ghcr.io/${{ github.repository }}/recommendation:${{ github.ref_name }}
+            
+      - name: Docker Build and push for Study
+        uses: docker/build-push-action@v4
+        with:
+          context: ./study
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/study:latest
+            ghcr.io/${{ github.repository }}/study:${{ github.ref_name }}
+            
+      - name: Docker Build and push for User
+        uses: docker/build-push-action@v4
+        with:
+          context: ./user
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/user:latest
+            ghcr.io/${{ github.repository }}/user:${{ github.ref_name }}
+            
+      - name: Docker Build and push for Boundedcontext10121951219512196
+        uses: docker/build-push-action@v4
+        with:
+          context: ./boundedcontext10121951219512196
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}/boundedcontext10121951219512196:latest
+            ghcr.io/${{ github.repository }}/boundedcontext10121951219512196:${{ github.ref_name }}
+            
